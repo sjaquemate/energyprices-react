@@ -3,6 +3,7 @@ todo
 [ ] add real energyprices (requires json) 
 [ ] make textfields work
 [ ] make table sortable
+[ ] calculate number of rows based on difference between height of table and lower section
 
 not done 
 [ ] obfuscation  
