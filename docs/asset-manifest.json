@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.css": "/static/css/main.c68e1568.css",
-    "main.js": "/static/js/main.fd87d0cd.js",
-    "index.html": "/index.html",
-    "main.c68e1568.css.map": "/static/css/main.c68e1568.css.map",
-    "main.fd87d0cd.js.map": "/static/js/main.fd87d0cd.js.map"
+    "main.css": "/energyprices-react/static/css/main.c68e1568.css",
+    "main.js": "/energyprices-react/static/js/main.fd87d0cd.js",
+    "index.html": "/energyprices-react/index.html",
+    "main.c68e1568.css.map": "/energyprices-react/static/css/main.c68e1568.css.map",
+    "main.fd87d0cd.js.map": "/energyprices-react/static/js/main.fd87d0cd.js.map"
   },
   "entrypoints": [
     "static/css/main.c68e1568.css",
