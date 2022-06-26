@@ -57,10 +57,25 @@ function createData(
 
 const rows = [
   createData('Budget Energie', 1.32, 2.5, -200),
-  createData('Vattenfall', 1.32, 2.5, -200),
-  createData('Engie', 1.32, 2.5, -200),
+  createData('Vattenfall', 0.7, 2.5, -200),
+  createData('Engie', 1.1, 2.5, -200),
   createData('Frank', 1.32, 2.5, -200),
   createData('Budget Energie Plus', 1.32, 2.5, -200),
+  createData('Budget Energie', 1.32, 2.5, -200),
+  createData('Budget Energie', 1.32, 2.5, -200),
+  createData('Budget Energie', 1.32, 2.5, -200),
+  createData('Vattenfall', 0.7, 2.5, -200),
+  createData('Engie', 1.1, 2.5, -200),
+  createData('Frank', 1.32, 2.5, -200),
+  createData('Budget Energie Plus', 1.32, 2.5, -200),
+  createData('Budget Energie', 1.32, 2.5, -200),
+  createData('Budget Energie', 1.32, 2.5, -200),
+  createData('Budget Energie', 1.32, 2.5, -200),
+  createData('Vattenfall', 0.7, 2.5, -200),
+  createData('Engie', 1.1, 2.5, -200),
+  createData('Frank', 1.32, 2.5, -200),
+  createData('Budget Energie Plus', 1.32, 2.5, -200),
+  createData('Budget Energie', 1.32, 2.5, -200),
   createData('Budget Energie', 1.32, 2.5, -200),
   createData('Budget Energie', 1.32, 2.5, -200),
 ];
@@ -76,7 +91,7 @@ function StickyHeadTable() {
     const rowHeight = firstRowRef.current?.clientHeight
     const ratioRowScreen = rowHeight / screenHeight
     console.log(ratioRowScreen)
-    const maxRowsPerPage = Math.floor(0.65 / ratioRowScreen)
+    const maxRowsPerPage = Math.floor(0.55 / ratioRowScreen)
     setRowsPerPage(isNaN(maxRowsPerPage) || maxRowsPerPage === 0 ? 1 : maxRowsPerPage)
   }
 
@@ -163,9 +178,9 @@ export default function App() {
       <div className="mx-auto">
         <StickyHeadTable />
       </div>
-      <div className="mt-5 p-5 b-5">
+      <div className="p-5">
         <div className="text-xl font-bold text-center uppercase text-green-500">bereken je tarief </div>
-        <div className="w-1/2 mt-5">
+        <div className="w-1/2">
 
         </div>
         <div className="flex flex-row gap-5 mt-5">
