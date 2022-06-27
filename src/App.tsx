@@ -7,7 +7,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import { LocalFireDepartment, VolumeDown, VolumeUp } from '@mui/icons-material';
@@ -15,9 +15,10 @@ import BoltIcon from '@mui/icons-material/Bolt';
 import HomeIcon from '@mui/icons-material/Home';
 import Stack from '@mui/material/Stack';
 import Slider from '@mui/material/Slider';
+import prices from './data/prices.json'
 
 interface Column {
-  id: 'naam' | 'elek' | 'gas' | 'maand';
+  id: 'naam' | 'elek' | 'gas' | 'maand' | 'energieLabel';
   label: string;
   minWidth?: number;
   align?: 'right';
@@ -26,23 +27,36 @@ interface Column {
 
 const columns: readonly Column[] = [
   { id: 'naam', label: '', minWidth: 0 },
-  { id: 'elek', label: 'stroom', minWidth: 0 },
   {
     id: 'gas',
     label: 'gas',
     minWidth: 0,
     align: 'right',
-    format: (value: number) => (<div> {value.toLocaleString('en-US')} </div>),
+    format: (value: number) => (<div className="italic"> {value.toFixed(2)} </div>),
   },
-  { id: 'maand', label: 'maand', minWidth: 0,
-    format: (value: number) => `€ ${value.toFixed(0)}` },
+  {
+    id: 'elek',
+    label: 'stroom',
+    minWidth: 0,
+    align: 'right',
+    format: (value: number) => (<div className="italic"> {value.toFixed(2)} </div>),
+  },
+  {
+    id: 'maand', label: 'maand', minWidth: 0, align: 'right',
+    format: (value: number) => `€ ${value.toFixed(0)}`
+  },
+  {
+    id: 'energieLabel', label: 'duurzaam', minWidth: 0, align: 'right',
+    format: (value: number) => <div className="font-bold text-green-600">{value.toFixed(1)}</div>
+  },
 ];
 
 interface Data {
-  naam: string;
-  elek: number;
-  gas: number;
-  maand: number;
+  naam: string
+  elek: number
+  gas: number
+  maand: number
+  energieLabel: number | null
 }
 
 function createData(
@@ -50,37 +64,22 @@ function createData(
   elek: number,
   gas: number,
   base: number,
+  energieLabel: number | null,
+  electrictyUsage: number,
+  gasUsage: number,
 ): Data {
-  const maand = (elek*2500 + gas* 1000 + base)/12 
-  return { naam, elek, gas, maand };
+  const maand = (elek * electrictyUsage + gas * gasUsage + base) / 12
+  return { naam: naam, elek: elek, gas: gas, maand: maand, energieLabel: energieLabel };
 }
 
-const rows = [
-  createData('Budget Energie', 1.32, 2.5, -200),
-  createData('Vattenfall', 0.7, 2.5, -200),
-  createData('Engie', 1.1, 2.5, -200),
-  createData('Frank', 1.32, 2.5, -200),
-  createData('Budget Energie Plus', 1.32, 2.5, -200),
-  createData('Budget Energie', 1.32, 2.5, -200),
-  createData('Budget Energie', 1.32, 2.5, -200),
-  createData('Budget Energie', 1.32, 2.5, -200),
-  createData('Vattenfall', 0.7, 2.5, -200),
-  createData('Engie', 1.1, 2.5, -200),
-  createData('Frank', 1.32, 2.5, -200),
-  createData('Budget Energie Plus', 1.32, 2.5, -200),
-  createData('Budget Energie', 1.32, 2.5, -200),
-  createData('Budget Energie', 1.32, 2.5, -200),
-  createData('Budget Energie', 1.32, 2.5, -200),
-  createData('Vattenfall', 0.7, 2.5, -200),
-  createData('Engie', 1.1, 2.5, -200),
-  createData('Frank', 1.32, 2.5, -200),
-  createData('Budget Energie Plus', 1.32, 2.5, -200),
-  createData('Budget Energie', 1.32, 2.5, -200),
-  createData('Budget Energie', 1.32, 2.5, -200),
-  createData('Budget Energie', 1.32, 2.5, -200),
-];
+// const rows = [
+//   createData('Vattenfall', 0.7, 2.5, -200),
+// ];
 
-function StickyHeadTable() {
+interface StickyHeadTableProps {
+  rows: Data[]
+}
+const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(4);
 
@@ -173,37 +172,50 @@ function StickyHeadTable() {
 }
 
 export default function App() {
+
+  const [electricityUsage, setElectricityUsage] = useState(2500)
+  const [gasUsage, setGasUsage] = useState(1200)
+
+  const rows = prices.map(price => (
+    createData(price.naam, price.price_electricity, price.price_gas, price.costs_base, price.energielabel, electricityUsage, gasUsage)
+  )).sort((a, b) => a.maand - b.maand).map((data, index) => ({ ...data, naam: `${index + 1}. ${data.naam}` }))
+
   return (
     <div className="w-full md:w-1/2 h-screen flex flex-col p-5 mx-auto">
-      <div className="mx-auto">
-        <StickyHeadTable />
+      <div className="">
+        <StickyHeadTable rows={rows} />
       </div>
       <div className="p-5">
         <div className="text-xl font-bold text-center uppercase text-green-500">bereken je tarief </div>
-        <div className="w-1/2">
-
-        </div>
         <div className="flex flex-row gap-5 mt-5">
 
-        <TextField
-          variant="standard"
-          label="postcode"
-          size="small"
-          defaultValue="1234AB"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <HomeIcon />
-              </InputAdornment>
-            ),
-          }}
+          <TextField
+            variant="standard"
+            label="postcode"
+            size="small"
+            disabled
+            value="9712JG"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <HomeIcon />
+                </InputAdornment>
+              ),
+            }}
 
           />
           <TextField
             variant="standard"
             label="stroom"
             size="small"
-            defaultValue="2,500"
+            value={electricityUsage.toString()}
+            onChange={(event) => {
+              const value = event.currentTarget.value
+              const onlyNumbers = value.replace(/\D/g, '')
+              const numberValue = onlyNumbers === '' ? 0 : parseInt(onlyNumbers)
+              if (numberValue > 10000) return
+              setElectricityUsage(numberValue)
+            }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -218,7 +230,14 @@ export default function App() {
             variant="standard"
             label="gas"
             size="small"
-            defaultValue="1,000"
+            value={gasUsage}
+            onChange={(event) => {
+              const value = event.currentTarget.value
+              const onlyNumbers = value.replace(/\D/g, '')
+              const numberValue = onlyNumbers === '' ? 0 : parseInt(onlyNumbers)
+              if (numberValue > 10000) return
+              setGasUsage(numberValue)
+            }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">

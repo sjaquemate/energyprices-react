@@ -1,9 +1,14 @@
 todo
-[ ] publish  
-[ ] add real energyprices (requires json) 
-[ ] make textfields work
+[x] publish  
+[x] add real energyprices (requires json) 
+[x] make textfields work
 [ ] make table sortable
 [ ] calculate number of rows based on difference between height of table and lower section
+[ ] favicon, description & title
+
+known bugs
+[ ] width table sizing bug 
+[ ] iphone refresh tablepage previous bug
 
 not done 
 [ ] obfuscation  
