@@ -120,14 +120,14 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer sx={{ maxHeight: '80vh' }}>
-        <Table stickyHeader aria-label="sticky table">
+        <Table stickyHeader size="small" aria-label="sticky table">
           <TableHead>
             <TableRow>
               {columns.map((column) => (
                 <TableCell
                   key={column.id}
                   align={column.align}
-                  style={{ minWidth: column.minWidth }}
+                  style={{ minWidth: 0, paddingLeft: "0rem", paddingRight: "0rem", flexWrap: "nowrap" }}
                 >
                   {column.label}
                 </TableCell>
