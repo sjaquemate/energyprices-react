@@ -16,17 +16,20 @@ import HomeIcon from '@mui/icons-material/Home';
 import Stack from '@mui/material/Stack';
 import Slider from '@mui/material/Slider';
 import prices from './data/prices.json'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 interface Column {
   id: 'naam' | 'elek' | 'gas' | 'maand' | 'energieLabel';
   label: string | JSX.Element;
   minWidth?: number;
   align?: 'right';
-  format?: (value: number) => string | JSX.Element;
+  format?: (value: number | string) => string | JSX.Element;
 }
 
 const columns: readonly Column[] = [
-  { id: 'naam', label: '', minWidth: 0 },
+  { id: 'naam', label: '', minWidth: 0,
+  format: (value: number | string) => (<div className="flex flex-row justify-left"> <div>{value}</div> <div className="text-xl transition hover:translate-x-1"><ChevronRightIcon fontSize="inherit"/></div></div>) 
+},
   {
     id: 'gas',
     label: <div className="flex flex-col">
@@ -35,7 +38,7 @@ const columns: readonly Column[] = [
       </div>,
     minWidth: 0,
     align: 'right',
-    format: (value: number) => (<div className="italic"> {value.toFixed(2)} </div>),
+    format: (value: number | string) => (<div className="italic"> {typeof value === "number" ? value.toFixed(2) : value} </div>),
   },
   {
     id: 'elek',
@@ -45,7 +48,7 @@ const columns: readonly Column[] = [
     </div>,
     minWidth: 0,
     align: 'right',
-    format: (value: number) => (<div className="italic"> {value.toFixed(2)} </div>),
+    format: (value: number | string) => (<div className="italic"> {typeof value === "number" ? value.toFixed(2) : value} </div>),
   },
   {
     id: 'maand', 
@@ -54,7 +57,7 @@ const columns: readonly Column[] = [
     <div className="text-xs italic">e/maand</div>
     </div>, 
     minWidth: 0, align: 'right',
-    format: (value: number) => `€ ${value.toFixed(0)}`
+    format: (value: number | string) => `€ ${typeof value === "number" ? value.toFixed(0) : value}`
   },
   // {
   //   id: 'energieLabel', label: 'duurzaam', minWidth: 0, align: 'right',
@@ -156,7 +159,7 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
                       const value = row[column.id];
                       return (
                         <TableCell key={column.id} align={column.align}>
-                          {column.format && typeof value === 'number'
+                          {column.format && (value !== null)
                             ? column.format(value)
                             : value}
                         </TableCell>
@@ -192,10 +195,10 @@ export default function App() {
   )).sort((a, b) => a.maand - b.maand).map((data, index) => ({ ...data, naam: `${index + 1}. ${data.naam}` }))
 
   return (
-    <div className="w-full md:w-1/2 h-screen flex flex-col p-5 mx-auto">
+    <div className="w-full md:w-1/2 h-screen flex flex-col p-2 mx-auto">
 
       <div className="">
-        <div className="text-xl font-bold text-center lowercase text-blue-400">verbruik  </div>
+        <div className="text-xl font-bold text-left lowercase ml-5 text-neutral-600">verbruik  </div>
         <div className="gap-5 mt-5 grid grid-cols-3 w-full">
 
           <TextField
@@ -204,13 +207,13 @@ export default function App() {
             size="small"
             disabled
             value="9712JG"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <HomeIcon />
-                </InputAdornment>
-              ),
-            }}
+            // InputProps={{
+            //   startAdornment: (
+            //     <InputAdornment position="start">
+            //       <HomeIcon />
+            //     </InputAdornment>
+            //   ),
+            // }}
 
           />
           <TextField
@@ -259,7 +262,7 @@ export default function App() {
           />
         </div>
       </div>
-      <div className="text-xl font-bold text-center lowercase text-blue-400 mt-5"> aanbod </div>
+      <div className="text-xl font-bold text-left ml-5 lowercase text-neutral-600 mt-5"> aanbod </div>
 
       <div className="mt-5">
         <StickyHeadTable rows={rows} />
