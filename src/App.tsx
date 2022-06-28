@@ -19,7 +19,7 @@ import prices from './data/prices.json'
 
 interface Column {
   id: 'naam' | 'elek' | 'gas' | 'maand' | 'energieLabel';
-  label: string;
+  label: string | JSX.Element;
   minWidth?: number;
   align?: 'right';
   format?: (value: number) => string | JSX.Element;
@@ -29,26 +29,37 @@ const columns: readonly Column[] = [
   { id: 'naam', label: '', minWidth: 0 },
   {
     id: 'gas',
-    label: 'gas',
+    label: <div className="flex flex-col">
+      <div>gas</div>
+      <div className="text-xs italic">€/m³</div>
+      </div>,
     minWidth: 0,
     align: 'right',
     format: (value: number) => (<div className="italic"> {value.toFixed(2)} </div>),
   },
   {
     id: 'elek',
-    label: 'stroom',
+    label:  <div className="flex flex-col">
+    <div>stroom</div>
+    <div className="text-xs italic">€/kWh</div>
+    </div>,
     minWidth: 0,
     align: 'right',
     format: (value: number) => (<div className="italic"> {value.toFixed(2)} </div>),
   },
   {
-    id: 'maand', label: 'maand', minWidth: 0, align: 'right',
+    id: 'maand', 
+    label: <div className="flex flex-col">
+    <div>kosten</div>
+    <div className="text-xs italic">e/maand</div>
+    </div>, 
+    minWidth: 0, align: 'right',
     format: (value: number) => `€ ${value.toFixed(0)}`
   },
-  {
-    id: 'energieLabel', label: 'duurzaam', minWidth: 0, align: 'right',
-    format: (value: number) => <div className="font-bold text-green-600">{value.toFixed(1)}</div>
-  },
+  // {
+  //   id: 'energieLabel', label: 'duurzaam', minWidth: 0, align: 'right',
+  //   format: (value: number) => <div className="font-bold text-green-600">{value.toFixed(1)}</div>
+  // },
 ];
 
 interface Data {
@@ -182,12 +193,10 @@ export default function App() {
 
   return (
     <div className="w-full md:w-1/2 h-screen flex flex-col p-5 mx-auto">
+
       <div className="">
-        <StickyHeadTable rows={rows} />
-      </div>
-      <div className="p-5">
-        <div className="text-xl font-bold text-center uppercase text-green-500">bereken je tarief </div>
-        <div className="flex flex-row gap-5 mt-5">
+        <div className="text-xl font-bold text-center lowercase text-blue-400">verbruik  </div>
+        <div className="gap-5 mt-5 grid grid-cols-3 w-full">
 
           <TextField
             variant="standard"
@@ -222,7 +231,7 @@ export default function App() {
                   <BoltIcon />
                 </InputAdornment>
               ),
-              endAdornment: <InputAdornment position="end"><div className="text-xs"></div></InputAdornment>
+              endAdornment: <InputAdornment position="end"><div className="text-xs">kWh</div></InputAdornment>
             }}
 
           />
@@ -244,11 +253,16 @@ export default function App() {
                   <LocalFireDepartment />
                 </InputAdornment>
               ),
-              endAdornment: <InputAdornment position="end"><div></div></InputAdornment> // m³
+              endAdornment: <InputAdornment position="end"><div className="flex flex-col text-xs"><div>m³</div></div></InputAdornment> // 
             }}
 
           />
         </div>
+      </div>
+      <div className="text-xl font-bold text-center lowercase text-blue-400 mt-5"> aanbod </div>
+
+      <div className="mt-5">
+        <StickyHeadTable rows={rows} />
       </div>
     </div>
   )
