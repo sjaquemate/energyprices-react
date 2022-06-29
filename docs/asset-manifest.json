@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/energyprices-react/static/css/main.c232d64f.css",
-    "main.js": "/energyprices-react/static/js/main.55ccda2d.js",
+    "main.css": "/energyprices-react/static/css/main.50b2cfa4.css",
+    "main.js": "/energyprices-react/static/js/main.b9c9cab4.js",
     "index.html": "/energyprices-react/index.html",
-    "main.c232d64f.css.map": "/energyprices-react/static/css/main.c232d64f.css.map",
-    "main.55ccda2d.js.map": "/energyprices-react/static/js/main.55ccda2d.js.map"
+    "main.50b2cfa4.css.map": "/energyprices-react/static/css/main.50b2cfa4.css.map",
+    "main.b9c9cab4.js.map": "/energyprices-react/static/js/main.b9c9cab4.js.map"
   },
   "entrypoints": [
-    "static/css/main.c232d64f.css",
-    "static/js/main.55ccda2d.js"
+    "static/css/main.50b2cfa4.css",
+    "static/js/main.b9c9cab4.js"
   ]
 }
