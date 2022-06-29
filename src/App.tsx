@@ -409,7 +409,7 @@ export default function App() {
           <div className="flex justify-between items-baseline ">
             {/* <div className="text-xl font-bold text-left ml-6 text-neutral-100"> Aanbod </div> */}
             <div className="text-xl font-bold text-left ml-6 text-teal-50"> aanbod </div>
-            <div className="text-teal-50 text-xs m-0">laast geüpdate 29 juni 2022</div>
+            <div className="text-teal-50 text-xs m-0">laatst geüpdate 29 juni 2022</div>
           </div>
 
           <div className="">
