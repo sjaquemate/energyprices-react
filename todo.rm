@@ -1,13 +1,20 @@
 todo
+
+functionaliteit
 [x] publish  
 [x] add real energyprices (requires json) 
 [x] make textfields work
-[ ] make table sortable
+[x] favicon, description & title
+[x] make table sortable
+[x] site click link 
+
+kosmetisch 
+[x] arrow link align right (-> nowrap in text) 
 [ ] calculate number of rows based on difference between height of table and lower section
-[ ] favicon, description & title
+
 
 known bugs
-[ ] width table sizing bug 
+[x] width table sizing bug 
 [ ] iphone refresh tablepage previous bug
 
 not done 

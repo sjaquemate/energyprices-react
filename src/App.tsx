@@ -7,66 +7,52 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
-import { LocalFireDepartment, VolumeDown, VolumeUp } from '@mui/icons-material';
+import { LensTwoTone, LocalFireDepartment, VolumeDown, VolumeUp } from '@mui/icons-material';
 import BoltIcon from '@mui/icons-material/Bolt';
 import HomeIcon from '@mui/icons-material/Home';
 import Stack from '@mui/material/Stack';
+import { createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@emotion/react';
 import Slider from '@mui/material/Slider';
 import prices from './data/prices.json'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import CreateIcon from '@mui/icons-material/Create';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import SpaceBarIcon from '@mui/icons-material/SpaceBar';
 
+type SortedState = "up" | "down" | null
+
+const SortingArrowButton = ({ sortedState, onClick }: { sortedState: SortedState, onClick: () => void }) => {
+
+  let icon = <div className="opacity-20"><ArrowUpwardIcon fontSize='inherit' /></div>
+  if (sortedState === "up") {
+    icon = <ArrowUpwardIcon fontSize='inherit' />
+  }
+  if (sortedState === "down") {
+    icon = <ArrowDownwardIcon fontSize='inherit' />
+  }
+  return (
+    <div className="text-md" onClick={onClick} >
+      {
+        icon
+      }
+    </div>
+  )
+}
 interface Column {
   id: 'naam' | 'elek' | 'gas' | 'maand' | 'energieLabel';
   label: string | JSX.Element;
   minWidth?: number;
-  align?: 'right';
-  format?: (value: number | string) => string | JSX.Element;
+  align?: 'left';
+  format?: (obj: any) => string | JSX.Element;
 }
 
-const columns: readonly Column[] = [
-  { id: 'naam', label: '', minWidth: 0,
-  format: (value: number | string) => (<div className="flex flex-row justify-left"> <div>{value}</div> <div className="text-xl transition hover:translate-x-1"><ChevronRightIcon fontSize="inherit"/></div></div>) 
-},
-  {
-    id: 'gas',
-    label: <div className="flex flex-col">
-      <div>gas</div>
-      <div className="text-xs italic">€/m³</div>
-      </div>,
-    minWidth: 0,
-    align: 'right',
-    format: (value: number | string) => (<div className="italic"> {typeof value === "number" ? value.toFixed(2) : value} </div>),
-  },
-  {
-    id: 'elek',
-    label:  <div className="flex flex-col">
-    <div>stroom</div>
-    <div className="text-xs italic">€/kWh</div>
-    </div>,
-    minWidth: 0,
-    align: 'right',
-    format: (value: number | string) => (<div className="italic"> {typeof value === "number" ? value.toFixed(2) : value} </div>),
-  },
-  {
-    id: 'maand', 
-    label: <div className="flex flex-col">
-    <div>kosten</div>
-    <div className="text-xs italic">e/maand</div>
-    </div>, 
-    minWidth: 0, align: 'right',
-    format: (value: number | string) => `€ ${typeof value === "number" ? value.toFixed(0) : value}`
-  },
-  // {
-  //   id: 'energieLabel', label: 'duurzaam', minWidth: 0, align: 'right',
-  //   format: (value: number) => <div className="font-bold text-green-600">{value.toFixed(1)}</div>
-  // },
-];
-
 interface Data {
-  naam: string
+  naam: { naam: string, url: string }
   elek: number
   gas: number
   maand: number
@@ -79,11 +65,12 @@ function createData(
   gas: number,
   base: number,
   energieLabel: number | null,
+  url: string,
   electrictyUsage: number,
   gasUsage: number,
 ): Data {
   const maand = (elek * electrictyUsage + gas * gasUsage + base) / 12
-  return { naam: naam, elek: elek, gas: gas, maand: maand, energieLabel: energieLabel };
+  return { naam: { naam: naam, url: url }, elek: elek, gas: gas, maand: maand, energieLabel: energieLabel };
 }
 
 // const rows = [
@@ -91,7 +78,7 @@ function createData(
 // ];
 
 interface StickyHeadTableProps {
-  rows: Data[]
+  rows: Data[],
 }
 const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
   const [page, setPage] = React.useState(0);
@@ -108,10 +95,10 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
     setRowsPerPage(isNaN(maxRowsPerPage) || maxRowsPerPage === 0 ? 1 : maxRowsPerPage)
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setRowsPerPageBasedOnScreenHeight()
-  })
-  useEffect(() => {
+  }, [])
+  useLayoutEffect(() => {
     window.addEventListener("resize", () => {
       setRowsPerPageBasedOnScreenHeight()
     });
@@ -131,6 +118,117 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
     setPage(0);
   };
 
+  const [sortedRows, setSortedRows] = useState(rows)
+
+  useEffect(() => {
+    setSortedRows(rows)
+    // sort on maand again
+    setSortedStates(["up", null, null])
+    sortRows("maand", "up")
+  }, [rows])
+
+  const sortRows = (sortKey: "maand" | "gas" | "elek", order: "down" | "up") => {
+    console.log(sortKey, order)
+    setSortedRows(prevRows =>
+      [...prevRows].sort((a, b) => order === "up" ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey])
+    )
+  }
+
+  const [sortedStates, setSortedStates] = useState<SortedState[]>(["up", null, null])
+
+  const flipSortedState = (num: number) => {
+    setSortedStates(prevSortedStates => {
+      let newSortedStates = [...prevSortedStates]
+      // set current active 
+      if (newSortedStates[num] === null) {
+        newSortedStates[num] = "up"
+      }
+      else {
+        newSortedStates[num] = newSortedStates[num] === "down" ? "up" : "down"
+      }
+      // deactivate rest
+      newSortedStates = newSortedStates.map((sortedState, index) => (
+        index === num ? sortedState : null
+      ))
+      return newSortedStates
+    })
+  }
+
+  useEffect(() => {
+    if (sortedStates[0] !== null) {
+      sortRows("maand", sortedStates[0])
+      // return 
+    }
+    if (sortedStates[1] !== null) {
+      sortRows("gas", sortedStates[1])
+      // return 
+    }
+    if (sortedStates[2] !== null) {
+      sortRows("elek", sortedStates[2])
+      // return 
+    }
+  }, [sortedStates])
+
+  const columns: Column[] = [
+    {
+      id: 'naam', label: '', minWidth: 0,
+      format: (obj: { naam: string, url: string }) => (
+
+        <div className="ml-5 flex flex-row justify-left items-baseline align-top gap-1  
+        cursor-pointer
+        transition duration-200 hover:translate-x-1 hover:text-teal-800 hover:font-bold delay-50"
+          onClick={() => window.open(obj.url)}>
+          <div className="whitespace-nowrap">{obj.naam} </div>
+          <div className="text-xl font-bold">
+            <ChevronRightIcon fontSize="inherit" />
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'maand',
+      label: <div className="flex flex-col text-center ">
+        <SortingArrowButton sortedState={sortedStates[0]} onClick={() => flipSortedState(0)} />
+        <div>kosten</div>
+        <div className="text-xs italic">€/maand</div>
+      </div>,
+      minWidth: 0,
+      // align: 'right',
+      format: (value: number) => (<div className="text-center text-teal-700 font-bold whitespace-nowrap hover:bg-blue-200">{`€ ${value.toFixed(0)},-`}</div>)
+    },
+    {
+      id: 'gas',
+      label: (
+        <div className="flex flex-col text-center">
+          {/* <SortableArrow /> */}
+          <SortingArrowButton sortedState={sortedStates[1]} onClick={() => flipSortedState(1)} />
+          <div>gas</div>
+          <div className="text-xs italic">€/m³</div>
+        </div>
+      ),
+      minWidth: 0,
+      // align: 'right',
+      format: (value: number) => (<div className="italic text-center py-2"> {value.toFixed(2)} </div>),
+    },
+    {
+      id: 'elek',
+      label: <div className="flex flex-col text-center">
+        <SortingArrowButton sortedState={sortedStates[2]} onClick={() => flipSortedState(2)} />
+
+        <div>stroom</div>
+        <div className="text-xs italic">€/kWh</div>
+      </div>,
+      minWidth: 0,
+      // align: 'right',
+      format: (value: number) => (<div className="italic text-center whitespace-nowrap">{value.toFixed(2)} </div>),
+    },
+    // {
+    //   id: 'energieLabel', label: 'stroom', minWidth: 0,
+    //   format: (value: number) => <div className="text-green-600 text-center italic">{value.toFixed(1)}</div>
+    // },
+  ];
+
+
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer sx={{ maxHeight: '80vh' }}>
@@ -141,7 +239,8 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
                 <TableCell
                   key={column.id}
                   align={column.align}
-                  style={{ minWidth: 0, paddingLeft: "0rem", paddingRight: "0rem", flexWrap: "nowrap" }}
+                  padding="checkbox"
+                // style={{ minWidth: 0, paddingLeft: "0rem", paddingRight: "0rem", margin: 0}}
                 >
                   {column.label}
                 </TableCell>
@@ -149,7 +248,7 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows
+            {sortedRows
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row, index) => {
                 const rowRef = index === 0 ? firstRowRef : undefined
@@ -158,7 +257,7 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (
-                        <TableCell key={column.id} align={column.align}>
+                        <TableCell padding='none' key={column.id} align={column.align}>
                           {column.format && (value !== null)
                             ? column.format(value)
                             : value}
@@ -185,28 +284,74 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
   );
 }
 
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      light: '#fff',
+      main: '#fff',
+      dark: '#fff',
+      contrastText: '#fff',
+    },
+    secondary: {
+      light: '#fff',
+      main: '#fff',
+      dark: '#fff',
+      contrastText: '#fff',
+    },
+  },
+});
+
 export default function App() {
 
   const [electricityUsage, setElectricityUsage] = useState(2500)
   const [gasUsage, setGasUsage] = useState(1200)
 
-  const rows = prices.map(price => (
-    createData(price.naam, price.price_electricity, price.price_gas, price.costs_base, price.energielabel, electricityUsage, gasUsage)
-  )).sort((a, b) => a.maand - b.maand).map((data, index) => ({ ...data, naam: `${index + 1}. ${data.naam}` }))
+  const [rows, setRows] = useState<Data[]>(prices.map(price => (
+    createData(price.naam, price.price_electricity, price.price_gas, price.costs_base, price.energielabel, price.url, electricityUsage, gasUsage))
+  ))
+
+  useEffect(() => {
+    setRows(
+      prices.map(price =>
+        createData(price.naam, price.price_electricity, price.price_gas, price.costs_base, price.energielabel, price.url, electricityUsage, gasUsage)
+      ))
+  }, [gasUsage, electricityUsage])
 
   return (
-    <div className="w-full md:w-1/2 h-screen flex flex-col p-2 mx-auto">
+    <ThemeProvider theme={theme}>
+      <div className="bg-teal-50">
 
-      <div className="">
-        <div className="text-xl font-bold text-left lowercase ml-5 text-neutral-600">verbruik  </div>
-        <div className="gap-5 mt-5 grid grid-cols-3 w-full">
+        <div className="w-full xl:w-1/2 md:w-2/3 mx-auto bg-teal-800 py-2">
+          <div className="flex flex-row justify-center text-teal-100 gap-2 text-xs md:text-md">
 
-          <TextField
-            variant="standard"
-            label="postcode"
-            size="small"
-            disabled
-            value="9712JG"
+            <div>
+              variabele energietarieven op een eerlijke manier
+
+            </div>
+            <div className="underline cursor-pointer"> over ons</div>
+          </div>
+        </div>
+        <div className="w-full xl:w-1/2 md:w-2/3 h-screen flex flex-col mx-auto bg-teal-500 gap-4 py-4 px-2 ">
+          {/* <div className="flex items-center gap-2 ml-5"> */}
+          {/* <div className="text-xl font-bold text-center text-teal-900 ml-6 ">variabeltarief.com</div> */}
+          <div className="text-xl font-bold text-left text-teal-50 ml-6">verbruik</div>
+          {/* <div className="text-2xl text-white "><CreateIcon fontSize='inherit'/></div> */}
+
+          {/* </div> */}
+          <div className="gap-5 grid grid-cols-3 w-full px-2">
+
+
+            <TextField
+              variant="standard"
+              label="postcode"
+              size="small"
+              // disabled
+              value="9712JG"
+              sx={{ color: 'white' }}
+            // InputLabelProps={{
+            //   style: { color: '#fff', accentColor: '#fff', borderBottomColor: '#fff' },
+            // }}
             // InputProps={{
             //   startAdornment: (
             //     <InputAdornment position="start">
@@ -215,58 +360,63 @@ export default function App() {
             //   ),
             // }}
 
-          />
-          <TextField
-            variant="standard"
-            label="stroom"
-            size="small"
-            value={electricityUsage.toString()}
-            onChange={(event) => {
-              const value = event.currentTarget.value
-              const onlyNumbers = value.replace(/\D/g, '')
-              const numberValue = onlyNumbers === '' ? 0 : parseInt(onlyNumbers)
-              if (numberValue > 10000) return
-              setElectricityUsage(numberValue)
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <BoltIcon />
-                </InputAdornment>
-              ),
-              endAdornment: <InputAdornment position="end"><div className="text-xs">kWh</div></InputAdornment>
-            }}
+            />
+            <TextField
+              variant="standard"
+              label="stroom"
+              size="small"
+              value={electricityUsage.toString()}
+              onChange={(event) => {
+                const value = event.currentTarget.value
+                const onlyNumbers = value.replace(/\D/g, '')
+                const numberValue = onlyNumbers === '' ? 0 : parseInt(onlyNumbers)
+                if (numberValue > 10000) return
+                setElectricityUsage(numberValue)
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <BoltIcon />
+                  </InputAdornment>
+                ),
+                endAdornment: <InputAdornment position="end"><div className="text-xs">kWh</div></InputAdornment>
+              }}
 
-          />
-          <TextField
-            variant="standard"
-            label="gas"
-            size="small"
-            value={gasUsage}
-            onChange={(event) => {
-              const value = event.currentTarget.value
-              const onlyNumbers = value.replace(/\D/g, '')
-              const numberValue = onlyNumbers === '' ? 0 : parseInt(onlyNumbers)
-              if (numberValue > 10000) return
-              setGasUsage(numberValue)
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LocalFireDepartment />
-                </InputAdornment>
-              ),
-              endAdornment: <InputAdornment position="end"><div className="flex flex-col text-xs"><div>m³</div></div></InputAdornment> // 
-            }}
+            />
+            <TextField
+              variant="standard"
+              label="gas"
+              size="small"
+              value={gasUsage}
+              onChange={(event) => {
+                const value = event.currentTarget.value
+                const onlyNumbers = value.replace(/\D/g, '')
+                const numberValue = onlyNumbers === '' ? 0 : parseInt(onlyNumbers)
+                if (numberValue > 10000) return
+                setGasUsage(numberValue)
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LocalFireDepartment />
+                  </InputAdornment>
+                ),
+                endAdornment: <InputAdornment position="end"><div className="flex flex-col text-xs"><div>m³</div></div></InputAdornment> // 
+              }}
 
-          />
+            />
+          </div>
+          <div className="flex justify-between items-baseline ">
+            {/* <div className="text-xl font-bold text-left ml-6 text-neutral-100"> Aanbod </div> */}
+            <div className="text-xl font-bold text-left ml-6 text-teal-50"> aanbod </div>
+            <div className="text-teal-50 text-xs m-0">laast geüpdate 29 juni 2022</div>
+          </div>
+
+          <div className="">
+            <StickyHeadTable rows={rows} />
+          </div>
         </div>
       </div>
-      <div className="text-xl font-bold text-left ml-5 lowercase text-neutral-600 mt-5"> aanbod </div>
-
-      <div className="mt-5">
-        <StickyHeadTable rows={rows} />
-      </div>
-    </div>
+    </ThemeProvider>
   )
 }

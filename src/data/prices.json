@@ -3,44 +3,48 @@
         "price_electricity": 0.48,
         "price_gas": 2.09,
         "costs_base": -207,
-        "energielabel": 8.1
+        "energielabel": 8.1,
+        "url": "https://www.budgetthuis.nl/energie"
     },
     {
         "naam": "Coolblue energie",
         "price_electricity": 0.6,
         "price_gas": 2.52,
         "costs_base": -312,
-        "energielabel": null
+        "energielabel": null,
+        "url": "https://www.coolblue.nl/energie"
     },
     {
         "naam": "Energie direct",
         "price_electricity": 0.54,
         "price_gas": 2.3,
         "costs_base": -223,
-        "energielabel": 4
+        "energielabel": 4,
+        "url": "https://www.energiedirect.nl/energie-aanbiedingen"
     },
     {
         "naam": "Engie",
         "price_electricity": 0.6,
         "price_gas": 2.64,
         "costs_base": -240,
-        "energielabel": null
-
+        "energielabel": null,
+        "url": "https://www.engie.nl/energie/aanvragen"
     },
     {
         "naam": "Essent",
         "price_electricity": 0.48,
         "price_gas": 2.28,
         "costs_base": -12,
-        "energielabel": 4
-
+        "energielabel": 4,
+        "url": "https://www.essent.nl/content/particulier/producten/alle_energietarieven/tarieven-stroom-en-gas/groene-stroom-en-gas-variabel.html"
     },
     {
         "naam": "Noord energie",
         "price_electricity": 0.48,
         "price_gas": 2.1,
         "costs_base": -148,
-        "energielabel": null
+        "energielabel": null,
+        "url": "https://noordenergie.nl/productaanbod/"
 
     },
     {
@@ -48,7 +52,8 @@
         "price_electricity": 0.6,
         "price_gas": 2.76,
         "costs_base": -240,
-        "energielabel": 10
+        "energielabel": 10,
+        "url": "https://pure-energie.nl/groene-energie/aanmelden/"
 
     },
     {
@@ -56,7 +61,8 @@
         "price_electricity": 0.52,
         "price_gas": 2.34,
         "costs_base": -205,
-        "energielabel": 4
+        "energielabel": 4,
+        "url": "https://www.unitedconsumers.com/energie/"
 
     },
     {
@@ -64,7 +70,8 @@
         "price_electricity": 0.66,
         "price_gas": 2.7,
         "costs_base": -222,
-        "energielabel": 9.6
+        "energielabel": 9.6,
+        "url": "https://vandebron.nl/beste-bod"
 
     },
     {
@@ -72,7 +79,8 @@
         "price_electricity": 0.6,
         "price_gas": 2.4,
         "costs_base": -204,
-        "energielabel": 7.4
+        "energielabel": 7.4,
+        "url": "https://www.vattenfall.nl/energie-aanbiedingen/"
 
     },
     {
@@ -80,7 +88,8 @@
         "price_electricity": 0.48,
         "price_gas": 2.16,
         "costs_base": -192,
-        "energielabel": 10
+        "energielabel": 10,
+        "url": "https://www.vrijopnaam.nl/aanmelden"
 
     }
 ]
