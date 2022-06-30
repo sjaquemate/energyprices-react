@@ -23,6 +23,7 @@ import CreateIcon from '@mui/icons-material/Create';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import SpaceBarIcon from '@mui/icons-material/SpaceBar';
+import { OverOnsDialog } from './components/OverOnsDialog';
 
 type SortedState = "up" | "down" | null
 
@@ -36,7 +37,7 @@ const SortingArrowButton = ({ sortedState, onClick }: { sortedState: SortedState
     icon = <ArrowDownwardIcon fontSize='inherit' />
   }
   return (
-    <div className="text-md" onClick={onClick} >
+    <div className="text-md cursor-pointer" onClick={onClick} >
       {
         icon
       }
@@ -194,7 +195,7 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
       </div>,
       minWidth: 0,
       // align: 'right',
-      format: (value: number) => (<div className="text-center text-teal-700 font-bold whitespace-nowrap hover:bg-blue-200">{`€ ${value.toFixed(0)},-`}</div>)
+      format: (value: number) => (<div className="text-center text-teal-700 font-bold whitespace-nowrap">{`€ ${value.toFixed(0)},-`}</div>)
     },
     {
       id: 'gas',
@@ -252,8 +253,11 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row, index) => {
                 const rowRef = index === 0 ? firstRowRef : undefined
+                // const colors = ["bg-teal-50", "bg-teal-100", "bg-teal-200", "bg-teal-300", "bg-teal-400", "bg-teal-500"]
+                // const color = colors[Math.floor(index / 2) % 6]
+                const color = "bg-white"
                 return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={index} ref={rowRef}>
+                  <TableRow hover role="checkbox" tabIndex={-1} key={index} ref={rowRef} className={color}>
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (
@@ -304,9 +308,16 @@ const theme = createTheme({
 
 export default function App() {
 
+  const [postcode, setPostcode] = useState("9712JG")
+  const [isValidPostcode, setIsValidPostcode] = useState(true)
   const [electricityUsage, setElectricityUsage] = useState(2500)
   const [gasUsage, setGasUsage] = useState(1200)
 
+  useEffect( () => {
+    const expr = new RegExp("^[0-9]{4} ?[a-zA-Z]{2}$")
+    const isValid = expr.test(postcode)
+    setIsValidPostcode(isValid)
+  }, [postcode])
   const [rows, setRows] = useState<Data[]>(prices.map(price => (
     createData(price.naam, price.price_electricity, price.price_gas, price.costs_base, price.energielabel, price.url, electricityUsage, gasUsage))
   ))
@@ -318,105 +329,119 @@ export default function App() {
       ))
   }, [gasUsage, electricityUsage])
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const openDialog = () => setIsDialogOpen(true)
+  const closeDialog = () => setIsDialogOpen(false)
+
   return (
-    <ThemeProvider theme={theme}>
-      <div className="bg-teal-50">
+    <div className="">
 
-        <div className="w-full xl:w-1/2 md:w-2/3 mx-auto bg-teal-800 py-2">
-          <div className="flex flex-row justify-center text-teal-100 gap-2 text-xs md:text-md">
+      <ThemeProvider theme={theme}>
+        <OverOnsDialog isOpen={isDialogOpen} closeDialog={closeDialog} />
+        <div className="bg-teal-50">
 
-            <div>
-              variabele energietarieven op een eerlijke manier
+          <div className="w-full xl:w-1/2 md:w-2/3 mx-auto bg-teal-800 py-2">
+            <div className="flex flex-row justify-center text-teal-100 gap-2 text-xs md:text-md">
 
+              <div>
+                variabele energietarieven op een eerlijke manier
+
+              </div>
+              <div className="underline cursor-pointer" onClick={openDialog}> over ons </div>
             </div>
-            <div className="underline cursor-pointer"> over ons</div>
+          </div>
+          <div className="w-full xl:w-1/2 md:w-2/3 h-screen flex flex-col mx-auto bg-teal-500 gap-4 py-4 px-2 ">
+            {/* <div className="flex items-center gap-2 ml-5"> */}
+            {/* <div className="text-xl font-bold text-center text-teal-900 ml-6 ">variabeltarief.com</div> */}
+            <div className="text-xl font-bold text-left text-teal-50 ml-6">verbruik</div>
+            {/* <div className="text-2xl text-white "><CreateIcon fontSize='inherit'/></div> */}
+
+            {/* </div> */}
+            <div className="gap-5 grid grid-cols-3 w-full px-2">
+
+
+              <TextField
+                variant="standard"
+                label="postcode"
+                size="small"
+                error={!isValidPostcode}
+                helperText={!isValidPostcode && "ongeldige postcode"}
+                // disabled
+                value={postcode}
+                sx={{ color: 'white' }}
+                onChange={(event) => {
+                  const s = event.currentTarget.value
+                  setPostcode(s)
+                }}
+              // InputLabelProps={{
+              //   style: { color: '#fff', accentColor: '#fff', borderBottomColor: '#fff' },
+              // }}
+              // InputProps={{
+              //   startAdornment: (
+              //     <InputAdornment position="start">
+              //       <HomeIcon />
+              //     </InputAdornment>
+              //   ),
+              // }}
+
+              />
+              <TextField
+                variant="standard"
+                label="stroom"
+                size="small"
+                value={electricityUsage.toString()}
+                onChange={(event) => {
+                  const value = event.currentTarget.value
+                  const onlyNumbers = value.replace(/\D/g, '')
+                  const numberValue = onlyNumbers === '' ? 0 : parseInt(onlyNumbers)
+                  if (numberValue > 10000) return
+                  setElectricityUsage(numberValue)
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <BoltIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: <InputAdornment position="end"><div className="text-xs">kWh</div></InputAdornment>
+                }}
+
+              />
+              <TextField
+                variant="standard"
+                label="gas"
+                size="small"
+                value={gasUsage}
+                onChange={(event) => {
+                  const value = event.currentTarget.value
+                  const onlyNumbers = value.replace(/\D/g, '')
+                  const numberValue = onlyNumbers === '' ? 0 : parseInt(onlyNumbers)
+                  if (numberValue > 10000) return
+                  setGasUsage(numberValue)
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LocalFireDepartment />
+                    </InputAdornment>
+                  ),
+                  endAdornment: <InputAdornment position="end"><div className="flex flex-col text-xs"><div>m³</div></div></InputAdornment> // 
+                }}
+
+              />
+            </div>
+            <div className="flex justify-between items-baseline ">
+              {/* <div className="text-xl font-bold text-left ml-6 text-neutral-100"> Aanbod </div> */}
+              <div className="text-xl font-bold text-left ml-6 text-teal-50"> aanbod </div>
+              <div className="text-teal-50 text-xs m-0">laatst geüpdate 29 juni 2022</div>
+            </div>
+
+            <div className="">
+              <StickyHeadTable rows={rows} />
+            </div>
           </div>
         </div>
-        <div className="w-full xl:w-1/2 md:w-2/3 h-screen flex flex-col mx-auto bg-teal-500 gap-4 py-4 px-2 ">
-          {/* <div className="flex items-center gap-2 ml-5"> */}
-          {/* <div className="text-xl font-bold text-center text-teal-900 ml-6 ">variabeltarief.com</div> */}
-          <div className="text-xl font-bold text-left text-teal-50 ml-6">verbruik</div>
-          {/* <div className="text-2xl text-white "><CreateIcon fontSize='inherit'/></div> */}
-
-          {/* </div> */}
-          <div className="gap-5 grid grid-cols-3 w-full px-2">
-
-
-            <TextField
-              variant="standard"
-              label="postcode"
-              size="small"
-              // disabled
-              value="9712JG"
-              sx={{ color: 'white' }}
-            // InputLabelProps={{
-            //   style: { color: '#fff', accentColor: '#fff', borderBottomColor: '#fff' },
-            // }}
-            // InputProps={{
-            //   startAdornment: (
-            //     <InputAdornment position="start">
-            //       <HomeIcon />
-            //     </InputAdornment>
-            //   ),
-            // }}
-
-            />
-            <TextField
-              variant="standard"
-              label="stroom"
-              size="small"
-              value={electricityUsage.toString()}
-              onChange={(event) => {
-                const value = event.currentTarget.value
-                const onlyNumbers = value.replace(/\D/g, '')
-                const numberValue = onlyNumbers === '' ? 0 : parseInt(onlyNumbers)
-                if (numberValue > 10000) return
-                setElectricityUsage(numberValue)
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <BoltIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: <InputAdornment position="end"><div className="text-xs">kWh</div></InputAdornment>
-              }}
-
-            />
-            <TextField
-              variant="standard"
-              label="gas"
-              size="small"
-              value={gasUsage}
-              onChange={(event) => {
-                const value = event.currentTarget.value
-                const onlyNumbers = value.replace(/\D/g, '')
-                const numberValue = onlyNumbers === '' ? 0 : parseInt(onlyNumbers)
-                if (numberValue > 10000) return
-                setGasUsage(numberValue)
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LocalFireDepartment />
-                  </InputAdornment>
-                ),
-                endAdornment: <InputAdornment position="end"><div className="flex flex-col text-xs"><div>m³</div></div></InputAdornment> // 
-              }}
-
-            />
-          </div>
-          <div className="flex justify-between items-baseline ">
-            {/* <div className="text-xl font-bold text-left ml-6 text-neutral-100"> Aanbod </div> */}
-            <div className="text-xl font-bold text-left ml-6 text-teal-50"> aanbod </div>
-            <div className="text-teal-50 text-xs m-0">laatst geüpdate 29 juni 2022</div>
-          </div>
-
-          <div className="">
-            <StickyHeadTable rows={rows} />
-          </div>
-        </div>
-      </div>
-    </ThemeProvider>
+      </ThemeProvider>
+    </div>
   )
 }
