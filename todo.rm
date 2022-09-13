@@ -1,23 +1,6 @@
 todo
 
-functionaliteit
-[x] publish  
-[x] add real energyprices (requires json) 
-[x] make textfields work
-[x] favicon, description & title
-[x] make table sortable
-[x] site click link 
-
-kosmetisch 
-[x] arrow link align right (-> nowrap in text) 
 [ ] calculate number of rows based on difference between height of table and lower section
-
-
-known bugs
-[x] width table sizing bug 
-[ ] iphone refresh tablepage previous bug
-
-not done 
-[ ] obfuscation  
-[ ] gas regios 
-[ ] historic tracking
+[ ] gas regios vaste tarieven check 
+[ ] laatste update naar vandaag default
+[ ] english option 

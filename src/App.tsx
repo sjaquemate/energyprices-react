@@ -85,20 +85,45 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(4);
 
-  const firstRowRef = useRef(null) as any
-
+  const tableRef = useRef(null) as any
+  const firstRowRef = useRef(null) as any 
+  
   const setRowsPerPageBasedOnScreenHeight = () => {
     const screenHeight = window.innerHeight
+    // const rowHeight = firstRowRef.current?.clientHeight
+    // console.log(tableRef.current.getBoundingClientRect())
+    const boundingClientRect = tableRef.current.getBoundingClientRect()
+    
+    const tableHeight = boundingClientRect.height
+    const distanceFromBottom = screenHeight - (boundingClientRect.y + tableHeight)
+    // const newMaxTableHeight = tableHeight + distanceFromBottom
+    // console.log(distanceFromBottom, tableHeight, newMaxTableHeight)
+    
     const rowHeight = firstRowRef.current?.clientHeight
-    const ratioRowScreen = rowHeight / screenHeight
-    console.log(ratioRowScreen)
-    const maxRowsPerPage = Math.floor(0.55 / ratioRowScreen)
-    setRowsPerPage(isNaN(maxRowsPerPage) || maxRowsPerPage === 0 ? 1 : maxRowsPerPage)
+    const newHeightIncrease = distanceFromBottom - rowHeight * 3
+
+    const numNewRows = Math.floor(newHeightIncrease / rowHeight)
+    setRowsPerPage(prevRowsPerPage => {
+      const newNumRows = prevRowsPerPage + numNewRows 
+      return isNaN(newNumRows) ? 2 : newNumRows
+    })
+
+    // if (distanceFromBottom < 0) {
+    //   setRowsPerPage(prevNumRows => prevNumRows - 1)
+    //   return true
+    // }
+    // setRowsPerPageBasedOnScreenHeight()
+    // else {
+    //   setRowsPerPage(prevNumRows => prevNumRows - 1)
+    // }
+    // con
+    // setRowsPerPageBasedOnScreenHeight()
+    // console.log(rowHeight)
+    // const ratioRowScreen = rowHeight / screenHeight
+    // console.log(ratioRowScreen)
+    // const maxRowsPerPage = Math.floor(0.55 / ratioRowScreen)
   }
 
-  useLayoutEffect(() => {
-    setRowsPerPageBasedOnScreenHeight()
-  }, [])
   useLayoutEffect(() => {
     window.addEventListener("resize", () => {
       setRowsPerPageBasedOnScreenHeight()
@@ -232,7 +257,7 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer sx={{ maxHeight: '80vh' }}>
+      <TableContainer sx={{ maxHeight: '80vh' }} ref={tableRef}>
         <Table stickyHeader size="small" aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -252,12 +277,12 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
             {sortedRows
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row, index) => {
-                const rowRef = index === 0 ? firstRowRef : undefined
                 // const colors = ["bg-teal-50", "bg-teal-100", "bg-teal-200", "bg-teal-300", "bg-teal-400", "bg-teal-500"]
                 // const color = colors[Math.floor(index / 2) % 6]
                 const color = "bg-white"
+                const ref = (index === 0) ? firstRowRef : undefined
                 return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={index} ref={rowRef} className={color}>
+                  <TableRow hover role="checkbox" ref={ref} tabIndex={-1} key={index} className={color}>
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (
@@ -313,7 +338,7 @@ export default function App() {
   const [electricityUsage, setElectricityUsage] = useState(2500)
   const [gasUsage, setGasUsage] = useState(1200)
 
-  useEffect( () => {
+  useEffect(() => {
     const expr = new RegExp("^[0-9]{4} ?[a-zA-Z]{2}$")
     const isValid = expr.test(postcode)
     setIsValidPostcode(isValid)
@@ -334,23 +359,20 @@ export default function App() {
   const closeDialog = () => setIsDialogOpen(false)
 
   return (
-    <div className="">
+    <div className="overflow-hidden">
 
       <ThemeProvider theme={theme}>
         <OverOnsDialog isOpen={isDialogOpen} closeDialog={closeDialog} />
         <div className="bg-teal-50">
 
-          <div className="w-full xl:w-1/2 md:w-2/3 mx-auto bg-teal-800 py-2">
-            <div className="flex flex-row justify-center text-teal-100 gap-2 text-xs md:text-md">
 
+          <div className="w-full xl:w-1/2 md:w-2/3 h-screen flex flex-col mx-auto bg-teal-500 gap-4">
+            <div className="flex flex-row justify-center text-teal-100 gap-2 text-xs md:text-md bg-teal-700 py-2">
               <div>
                 variabele energietarieven op een eerlijke manier
-
               </div>
               <div className="underline cursor-pointer" onClick={openDialog}> over ons </div>
             </div>
-          </div>
-          <div className="w-full xl:w-1/2 md:w-2/3 h-screen flex flex-col mx-auto bg-teal-500 gap-4 py-4 px-2 ">
             {/* <div className="flex items-center gap-2 ml-5"> */}
             {/* <div className="text-xl font-bold text-center text-teal-900 ml-6 ">variabeltarief.com</div> */}
             <div className="text-xl font-bold text-left text-teal-50 ml-6">verbruik</div>
@@ -433,10 +455,10 @@ export default function App() {
             <div className="flex justify-between items-baseline ">
               {/* <div className="text-xl font-bold text-left ml-6 text-neutral-100"> Aanbod </div> */}
               <div className="text-xl font-bold text-left ml-6 text-teal-50"> aanbod </div>
-              <div className="text-teal-50 text-xs m-0">laatst geüpdate 29 juni 2022</div>
+              <div className="text-teal-50 text-xs mr-2">laatst geüpdate 29 juni 2022</div>
             </div>
 
-            <div className="">
+            <div className="px-2">
               <StickyHeadTable rows={rows} />
             </div>
           </div>
