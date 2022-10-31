@@ -10,20 +10,19 @@ import TableRow from '@mui/material/TableRow';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
-import { LensTwoTone, LocalFireDepartment, VolumeDown, VolumeUp } from '@mui/icons-material';
-import BoltIcon from '@mui/icons-material/Bolt';
-import HomeIcon from '@mui/icons-material/Home';
+
 import Stack from '@mui/material/Stack';
 import { createTheme } from '@mui/material/styles';
 import { ThemeProvider } from '@emotion/react';
 import Slider from '@mui/material/Slider';
-import prices from './data/prices.json'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CreateIcon from '@mui/icons-material/Create';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import SpaceBarIcon from '@mui/icons-material/SpaceBar';
 import { OverOnsDialog } from './components/OverOnsDialog';
+import { GegevensEditor } from './GegevensEditor';
+import { Scrollbars } from 'react-custom-scrollbars';
 
 type SortedState = "up" | "down" | null
 
@@ -52,7 +51,7 @@ interface Column {
   format?: (obj: any) => string | JSX.Element;
 }
 
-interface Data {
+export interface Data {
   naam: { naam: string, url: string }
   elek: number
   gas: number
@@ -60,89 +59,15 @@ interface Data {
   energieLabel: number | null
 }
 
-function createData(
-  naam: string,
-  elek: number,
-  gas: number,
-  base: number,
-  energieLabel: number | null,
-  url: string,
-  electrictyUsage: number,
-  gasUsage: number,
-): Data {
-  const maand = (elek * electrictyUsage + gas * gasUsage + base) / 12
-  return { naam: { naam: naam, url: url }, elek: elek, gas: gas, maand: maand, energieLabel: energieLabel };
-}
-
-// const rows = [
-//   createData('Vattenfall', 0.7, 2.5, -200),
-// ];
-
 interface StickyHeadTableProps {
   rows: Data[],
 }
 const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(4);
+  const [rowsPerPage, setRowsPerPage] = React.useState(100);
 
   const tableRef = useRef(null) as any
-  const firstRowRef = useRef(null) as any 
-  
-  const setRowsPerPageBasedOnScreenHeight = () => {
-    const screenHeight = window.innerHeight
-    // const rowHeight = firstRowRef.current?.clientHeight
-    // console.log(tableRef.current.getBoundingClientRect())
-    const boundingClientRect = tableRef.current.getBoundingClientRect()
-    
-    const tableHeight = boundingClientRect.height
-    const distanceFromBottom = screenHeight - (boundingClientRect.y + tableHeight)
-    // const newMaxTableHeight = tableHeight + distanceFromBottom
-    // console.log(distanceFromBottom, tableHeight, newMaxTableHeight)
-    
-    const rowHeight = firstRowRef.current?.clientHeight
-    const newHeightIncrease = distanceFromBottom - rowHeight * 3
-
-    const numNewRows = Math.floor(newHeightIncrease / rowHeight)
-    setRowsPerPage(prevRowsPerPage => {
-      const newNumRows = prevRowsPerPage + numNewRows 
-      return isNaN(newNumRows) ? 2 : newNumRows
-    })
-
-    // if (distanceFromBottom < 0) {
-    //   setRowsPerPage(prevNumRows => prevNumRows - 1)
-    //   return true
-    // }
-    // setRowsPerPageBasedOnScreenHeight()
-    // else {
-    //   setRowsPerPage(prevNumRows => prevNumRows - 1)
-    // }
-    // con
-    // setRowsPerPageBasedOnScreenHeight()
-    // console.log(rowHeight)
-    // const ratioRowScreen = rowHeight / screenHeight
-    // console.log(ratioRowScreen)
-    // const maxRowsPerPage = Math.floor(0.55 / ratioRowScreen)
-  }
-
-  useLayoutEffect(() => {
-    window.addEventListener("resize", () => {
-      setRowsPerPageBasedOnScreenHeight()
-    });
-    return () => {
-      window.removeEventListener("resize", () => {
-        setRowsPerPageBasedOnScreenHeight()
-      })
-    }
-  }, []);
-
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
+  const firstRowRef = useRef(null) as any
 
   const [sortedRows, setSortedRows] = useState(rows)
 
@@ -170,7 +95,8 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
         newSortedStates[num] = "up"
       }
       else {
-        newSortedStates[num] = newSortedStates[num] === "down" ? "up" : "down"
+        // newSortedStates[num] = newSortedStates[num] === "down" ? "up" : "down"
+        newSortedStates[num] = "up"
       }
       // deactivate rest
       newSortedStates = newSortedStates.map((sortedState, index) => (
@@ -216,7 +142,7 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
       label: <div className="flex flex-col text-center ">
         <SortingArrowButton sortedState={sortedStates[0]} onClick={() => flipSortedState(0)} />
         <div>kosten</div>
-        <div className="text-xs italic">€/maand</div>
+        <div className="text-xs">€/maand</div>
       </div>,
       minWidth: 0,
       // align: 'right',
@@ -229,12 +155,12 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
           {/* <SortableArrow /> */}
           <SortingArrowButton sortedState={sortedStates[1]} onClick={() => flipSortedState(1)} />
           <div>gas</div>
-          <div className="text-xs italic">€/m³</div>
+          <div className="text-xs">€/m³</div>
         </div>
       ),
       minWidth: 0,
       // align: 'right',
-      format: (value: number) => (<div className="italic text-center py-2"> {value.toFixed(2)} </div>),
+      format: (value: number) => (<div className="text-center py-2"> {value.toFixed(2)} </div>),
     },
     {
       id: 'elek',
@@ -242,11 +168,11 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
         <SortingArrowButton sortedState={sortedStates[2]} onClick={() => flipSortedState(2)} />
 
         <div>stroom</div>
-        <div className="text-xs italic">€/kWh</div>
+        <div className="text-xs">€/kWh</div>
       </div>,
       minWidth: 0,
       // align: 'right',
-      format: (value: number) => (<div className="italic text-center whitespace-nowrap">{value.toFixed(2)} </div>),
+      format: (value: number) => (<div className="text-center whitespace-nowrap">{value.toFixed(2)} </div>),
     },
     // {
     //   id: 'energieLabel', label: 'stroom', minWidth: 0,
@@ -256,8 +182,8 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
 
 
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer sx={{ maxHeight: '80vh' }} ref={tableRef}>
+    <Paper sx={{ width: '100%' }}>
+      <TableContainer sx={{}} ref={tableRef}>
         <Table stickyHeader size="small" aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -299,16 +225,6 @@ const StickyHeadTable = ({ rows }: StickyHeadTableProps) => {
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
-
-        rowsPerPageOptions={[]}
-        component="div"
-        count={rows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
     </Paper>
   );
 }
@@ -333,133 +249,45 @@ const theme = createTheme({
 
 export default function App() {
 
-  const [postcode, setPostcode] = useState("9712JG")
-  const [isValidPostcode, setIsValidPostcode] = useState(true)
-  const [electricityUsage, setElectricityUsage] = useState(2500)
-  const [gasUsage, setGasUsage] = useState(1200)
-
-  useEffect(() => {
-    const expr = new RegExp("^[0-9]{4} ?[a-zA-Z]{2}$")
-    const isValid = expr.test(postcode)
-    setIsValidPostcode(isValid)
-  }, [postcode])
-  const [rows, setRows] = useState<Data[]>(prices.map(price => (
-    createData(price.naam, price.price_electricity, price.price_gas, price.costs_base, price.energielabel, price.url, electricityUsage, gasUsage))
-  ))
-
-  useEffect(() => {
-    setRows(
-      prices.map(price =>
-        createData(price.naam, price.price_electricity, price.price_gas, price.costs_base, price.energielabel, price.url, electricityUsage, gasUsage)
-      ))
-  }, [gasUsage, electricityUsage])
-
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const openDialog = () => setIsDialogOpen(true)
   const closeDialog = () => setIsDialogOpen(false)
 
+  const [rows, setRows] = useState<Data[]>()
+
   return (
-    <div className="overflow-hidden">
+    <div className="relative">
 
       <ThemeProvider theme={theme}>
         <OverOnsDialog isOpen={isDialogOpen} closeDialog={closeDialog} />
-        <div className="bg-teal-50">
+        <div className="bg-neutral-200">
+          <div className="flex w-full xl:w-1/2 md:w-2/3 h-screen flex flex-col mx-auto bg-teal-500 gap-4">
 
-
-          <div className="w-full xl:w-1/2 md:w-2/3 h-screen flex flex-col mx-auto bg-teal-500 gap-4">
             <div className="flex flex-row justify-center text-teal-100 gap-2 text-xs md:text-md bg-teal-700 py-2">
               <div>
                 variabele energietarieven op een eerlijke manier
               </div>
               <div className="underline cursor-pointer" onClick={openDialog}> over ons </div>
             </div>
-            {/* <div className="flex items-center gap-2 ml-5"> */}
-            {/* <div className="text-xl font-bold text-center text-teal-900 ml-6 ">variabeltarief.com</div> */}
-            <div className="text-xl font-bold text-left text-teal-50 ml-6">verbruik</div>
-            {/* <div className="text-2xl text-white "><CreateIcon fontSize='inherit'/></div> */}
-
-            {/* </div> */}
-            <div className="gap-5 grid grid-cols-3 w-full px-2">
-
-
-              <TextField
-                variant="standard"
-                label="postcode"
-                size="small"
-                error={!isValidPostcode}
-                helperText={!isValidPostcode && "ongeldige postcode"}
-                // disabled
-                value={postcode}
-                sx={{ color: 'white' }}
-                onChange={(event) => {
-                  const s = event.currentTarget.value
-                  setPostcode(s)
-                }}
-              // InputLabelProps={{
-              //   style: { color: '#fff', accentColor: '#fff', borderBottomColor: '#fff' },
-              // }}
-              // InputProps={{
-              //   startAdornment: (
-              //     <InputAdornment position="start">
-              //       <HomeIcon />
-              //     </InputAdornment>
-              //   ),
-              // }}
-
-              />
-              <TextField
-                variant="standard"
-                label="stroom"
-                size="small"
-                value={electricityUsage.toString()}
-                onChange={(event) => {
-                  const value = event.currentTarget.value
-                  const onlyNumbers = value.replace(/\D/g, '')
-                  const numberValue = onlyNumbers === '' ? 0 : parseInt(onlyNumbers)
-                  if (numberValue > 10000) return
-                  setElectricityUsage(numberValue)
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <BoltIcon />
-                    </InputAdornment>
-                  ),
-                  endAdornment: <InputAdornment position="end"><div className="text-xs">kWh</div></InputAdornment>
-                }}
-
-              />
-              <TextField
-                variant="standard"
-                label="gas"
-                size="small"
-                value={gasUsage}
-                onChange={(event) => {
-                  const value = event.currentTarget.value
-                  const onlyNumbers = value.replace(/\D/g, '')
-                  const numberValue = onlyNumbers === '' ? 0 : parseInt(onlyNumbers)
-                  if (numberValue > 10000) return
-                  setGasUsage(numberValue)
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LocalFireDepartment />
-                    </InputAdornment>
-                  ),
-                  endAdornment: <InputAdornment position="end"><div className="flex flex-col text-xs"><div>m³</div></div></InputAdornment> // 
-                }}
-
-              />
+            <div className="mx-6 ">
+              <div className="w-full flex justify-end text-right">
+                <div className="flex flex-col ">
+                  <div className="flex items-baseline font-bold text-teal-50">
+                    <div className="text-[2.5rem]">v</div>
+                    <div className="text-[2rem]">ariabeltarief.com</div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex text-teal-100 justify-end text-right">
+                <div className="text-[1rem]">transparante energietarieven op een eerlijke manier</div>
+              </div>
             </div>
-            <div className="flex justify-between items-baseline ">
-              {/* <div className="text-xl font-bold text-left ml-6 text-neutral-100"> Aanbod </div> */}
-              <div className="text-xl font-bold text-left ml-6 text-teal-50"> aanbod </div>
-              <div className="text-teal-50 text-xs mr-2">laatst geüpdate 29 juni 2022</div>
+            <div className="text-teal-100 text-xs text-left mx-6">laatst geüpdate 29 juni 2022</div>
+            <div className="flex-grow px-6 h-0 overflow-y-scroll">
+              {rows && <StickyHeadTable rows={rows} />}
             </div>
-
-            <div className="px-2">
-              <StickyHeadTable rows={rows} />
+            <div className="flex-none">
+              <GegevensEditor setRows={setRows} />
             </div>
           </div>
         </div>
