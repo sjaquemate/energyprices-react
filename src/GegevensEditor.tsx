@@ -55,7 +55,7 @@ export function GegevensEditor({setRows}: Props) {
   }, [gasUsage, electricityUsage])
 
 
-  return <div className="p-2 mx-6 bg-teal-400 pb-4">
+  return <div className="p-2 bg-teal-400 pb-4">
     <div className="text-center text-white">
 
     {/* <ExpandMoreIcon /> */}

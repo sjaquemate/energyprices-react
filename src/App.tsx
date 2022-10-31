@@ -283,7 +283,7 @@ export default function App() {
               </div>
             </div>
             <div className="text-teal-100 text-xs text-left mx-6">laatst geüpdate 29 juni 2022</div>
-            <div className="flex-grow px-6 h-0 overflow-y-scroll">
+            <div className="flex-grow h-0 overflow-y-scroll">
               {rows && <StickyHeadTable rows={rows} />}
             </div>
             <div className="flex-none">
